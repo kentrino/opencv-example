@@ -3,28 +3,35 @@ cmake_minimum_required(VERSION 2.8)
 add_executable(opencv_example src/main.cc)
 project(opencv_example)
 
-# TODO: I want to create CMakeLists.txt which can build whole project at once.
-# add_definitions(-DWITH_QT OFF)
-# add_definitions(-DWITH_OPENGL ON)
-# add_definitions(-DWITH_VTK OFF)
-# add_definitions(-DWITH_CUDA OFF)
-# add_definitions(-DWITH_OPENEXR OFF)
-# add_definitions(-DWITH_WEBP OFF)
-# add_definitions(-DBUILD_PROTOBUF OFF)
-# add_definitions(-DBUILD_opencv_dnn OFF)
-# add_definitions(-DBUILD_opencv_legacy OFF)
-# add_definitions(-DBUILD_PERF_TESTS OFF)
-# add_definitions(-DBUILD_DOCS OFF)
-# add_definitions(-DBUILD_TESTS OFF)
-# add_definitions(-DBUILD_EXAMPLES OFF)
-# add_definitions(-DENABLE_FAST_MATH 1)
-# add_definitions(-DCMAKE_BUILD_TYPE RELEASE)
-
-SET("OpenCV_DIR" "deps/opencv/build")
-
-find_package(OpenCV 3.4.0 REQUIRED)
-
-if(OpenCV_FOUND)
-  include_directories(${OpenCV_INCLUDE_DIRS})
-  target_link_libraries(opencv_example ${OpenCV_LIBS})
-endif(OpenCV_FOUND)
+include(ExternalProject)
+ExternalProject_Add(OpenCV 
+  # deps/src, deps/tmp are generated
+  PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/deps
+  GIT_REPOSITORY https://github.com/opencv/opencv.git
+  GIT_TAG 3.3.1
+  GIT_SHALLOW 1
+  # build/opencv generated
+  SOURCE_DIR opencv
+  # build/opencv-build generated
+  BINARY_DIR opencv-build
+  CMAKE_ARGS
+    ${ep_common_args}
+    -DWITH_QT:BOOL=FALSE
+    -DWITH_OPENGL:BOOL=TRUE
+    -DWITH_VTK:BOOL=FALSE
+    -DWITH_CUDA:BOOL=FALSE
+    -DWITH_OPENEXR:BOOL=FALSE
+    -DWITH_WEBP:BOOL=FALSE
+    -DBUILD_PROTOBUF:BOOL=FALSE
+    -DBUILD_opencv_dnn:BOOL=FALSE
+    -DBUILD_opencv_legacy:BOOL=FALSE
+    -DBUILD_PERF_TESTS:BOOL=FALSE
+    -DBUILD_DOCS:BOOL=FALSE
+    -DBUILD_TESTS:BOOL=FALSE
+    -DBUILD_EXAMPLES:BOOL=FALSE
+    -DENABLE_FAST_MATH:BOOL=TRUE
+    -DCMAKE_BUILD_TYPE=RELEASE
+)
+set(OpenCV_DIR ${CMAKE_BINARY_DIR}/opencv-build)
+find_package(OpenCV 3.3.1 REQUIRED)
+target_link_libraries(opencv_example ${OpenCV_LIBS})
